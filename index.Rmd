@@ -13,7 +13,7 @@ Questions to Explore:
 
 1. Which places in the New York City neighbourhood are the safest from gun violence? On the other end of the spectrum, what are the riskiest neighbourhoods? Is there any association between safety of a neighbourhood and the average income of the neighborhood?
 
-2. Is there a crime trend in terms of an hour of the day/day of the week/month of the year/season or other parameters where the number of violent crimes spike? Can this be used to take proactive measures to prevent crime in terms of increasing security or redirecting the existing workforce to different areas?
+2. Is there a crime trend in terms of an hour of the day/day of the week/month of the year/season or other parameters where the number of violent crimes spike? 
 
 3. Studying the demographics of victims and perpetrators. 
     a. Which age-group/race/gender of victims are at more-risk?
