@@ -1,3 +1,4 @@
 # Interactive component
 
 
+<iframe src="interactive_chart.html" width="800" height="800"></iframe>
