@@ -96,15 +96,15 @@ df1<-shooting %>%
   dplyr::summarise(UNIQUE_COUNT = n_distinct(INCIDENT_KEY))
 
 
-p<-ggplot(data=df1,aes(x = factor(weekday, unique(weekdays(min(df1$OCCUR_DATE) + 1:7))),y=UNIQUE_COUNT )) +
+df1$weekday<- factor(df1$weekday, levels=c("Monday","Tuesday", "Wednesday", "Thursday", "Friday", "Saturday","Sunday"))
+
+ggplot(data=df1,aes(x = weekday,y=UNIQUE_COUNT )) +
   geom_boxplot() + 
   ggtitle("Box Plots of number of shootings as a function of week day ") + 
   xlab("Weekday") + 
   ylab("Number of shootings") +
   theme(plot.title = element_text(face = "bold"))+
   coord_flip()
-
-p
 
 # Saturday and Sunday are more risky compared to other days.
 
