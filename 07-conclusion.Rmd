@@ -1,2 +1,14 @@
 # Conclusion
 
+Our approach to the exploratory analysis on the New York Shooting incidents was to:
+  1. Hypothesize the reason for gun violence
+  2. Obtain supplementary data and research about reasons for crime and violence
+  3. Understand the overall data from 2006 to 2019 and also individually at a granular level based on year and neighbourhood
+  4. Who are the people and where are the areas most of the shooting events happen
+
+
+We hypothesized that Gun Violence in terms of shooting events are highly correlated to the neighbourhood income level, time of the day and the time of the year. There is significant research on the seasonality of crimes and their reasons. We observed the similar trends to hold true with our data related to New York City.
+We found out that the income levels of the neighbourhood is a very significant factor for where the shooting events occur along with the race of both the victim and the perpetrator. Similarly, the location of the shooting has a high correlation with the neighbourhood in which the shooting occurs.
+
+We can see a lot of summary trends which hold true and one can understand the pattern of crimes and shootings based on these observations.
+
