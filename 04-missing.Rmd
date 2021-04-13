@@ -20,6 +20,8 @@ shooting<-shooting[!grepl("224", shooting$PERP_AGE_GROUP),]
 shooting<-shooting[!grepl("940", shooting$PERP_AGE_GROUP),]
 ```
 
+Row-wise distribution of Missing Data
+
 ```{r}
 #plots for missing values distribution
 
@@ -28,9 +30,20 @@ vis_miss(shooting)
 
 
 ```
+
+We can see that the recent data has more missing values for the perpetrator details compared to the older data. We hypothesize that it could be because it takes time to find the criminal or because of only improved skills of the criminals that they aren't being caught.
+
+
+Overlap of missing data in various columns.
+
 ```{r}
 gg_miss_upset(shooting)
 ```
+
+The graph shows us a holistic view of the missing data columns in the dataset.
+The dots when marked mean that the value is missing in all those columns. For example, the first bar shows that location description is missing.
+
+Whereas the second bar indicates that the 4 columns - Location and Perpetrator age, sex, and race are all missing.
 
 ```{r}
 # Lot of missing values in LOCATION_DESC, perpretrator age group, sex, race. This makes sense because not all perpretrators will be caught to capture this informartion.
@@ -54,6 +67,8 @@ ggplot(missing_data, aes(fill=availability, x=year, y=value))+
   
 
 ```
+
+You can observe that the missing proportion of perpetrator info is increasing over the years.
 
 
 
