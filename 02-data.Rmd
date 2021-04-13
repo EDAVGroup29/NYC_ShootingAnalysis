@@ -1,2 +1,20 @@
 # Data sources
 
+### Main Data Source: 
+https://catalog.data.gov/dataset/nypd-shooting-incident-data-historic
+The above data source contains all the shooting events in NYC from 2006 to 2019. The NYPD documents all the shooting events that take place in the city and update the same every quarter. The Office of Management Analysis and Planning reviews the events before being posted to the website. There are ~21k records and the attributes of each shooting include data, time and location of the event along with perpetrator and victim demographics (age, race, gender). 
+
+Number of Rows: 21626
+Number of Columns: 19
+Each shooting event is identified by the INCIDENT KEY for that event. However, if there are multiple victims or perpetrators, the same incident key is repeated. 
+There are 5 boroughs namely Manhattan, Brooklyn, Bronx, Queens and Staten Island.
+There are 76 Precincts across the five boroughs.
+The data for the AGE GROUP of both perpetrators and victims are aggregated into groups in the raw data. It would be helpful if the exact age was available instead of the age groups. The buckets are <18, 18-24, 25-44, 45-64, 65+ and UNKNOWN. 
+The RACE for the perpetrator and victim are factors with values AMERICAN INDIAN/ALASKAN NATIVE, ASIAN / PACIFIC ISLANDER, BLACK, BLACK HISPANIC, WHITE, WHITE HISPANIC and UNKNOWN.
+Location of the shooting incident is present in both Latitute-Longitude format and the GeoPoint format. 
+
+
+
+### Supplementary Data: 
+https://data.cccnewyork.org/data/table/66/median-incomes#66/107/62/a/a
+The above data source contains the zipcode wise median income across NYC. Each precinct is an aggregation of multiple zip codes and hence this is a more granular data. There is also aggregated income data available at borough and district level. 
