@@ -1,1 +1,358 @@
 # Results
+
+```{r}
+
+#Analysis for number of attackers and victims at incident.
+
+
+attackers_victims<-shooting %>%
+  dplyr::group_by(INCIDENT_KEY)%>%
+  dplyr::summarise(n_attackers = n_distinct(PERP_AGE_GROUP),n_victims=n_distinct(VIC_AGE_GROUP))
+
+df_attackers <- attackers_victims %>%
+  dplyr::group_by(n_attackers)%>%
+  dplyr::summarise(count = n_distinct(INCIDENT_KEY))
+
+df_victims <- attackers_victims %>%
+  dplyr::group_by(n_victims)%>%
+  dplyr::summarise(count = n_distinct(INCIDENT_KEY))
+
+
+p<-
+  ggplot(data=df_victims)+
+  geom_bar(aes(x=n_victims, y=count),stat='identity')+
+  ggtitle('Distribution  of number of victims ')+
+  xlab('num victims at a incident') +
+  ylab('count of incidents')+
+  theme(plot.title = element_text(hjust=0.5))
+  
+p
+
+
+p<-
+  ggplot(data=df_attackers)+
+  geom_bar(aes(x=n_attackers, y=count),stat='identity')+
+  ggtitle('Number of shootings distribution ')+
+  xlab('num attackers at a incident') +
+  ylab('count of incidents')+
+  theme(plot.title = element_text(hjust=0.5))
+p
+
+```
+
+
+```{r}
+
+
+location_stats<-shooting %>%
+   filter(shooting$LOCATION_DESC!="")%>%
+  dplyr::group_by(LOCATION_DESC)%>%
+  dplyr::summarise(n_attacks = n_distinct(INCIDENT_KEY))
+
+location_stats <- location_stats%>%
+   filter(location_stats$n_attacks>50)
+p<-
+  ggplot(data=location_stats)+
+  geom_bar(aes(x=reorder(LOCATION_DESC,n_attacks), y=n_attacks),stat='identity')+
+  coord_flip()+
+  ggtitle('Major shooting locations')+
+  xlab('Location') +
+  ylab('Number of shootings')+
+  theme(plot.title = element_text(hjust=0.5))
+p
+
+```
+
+We looked at the locations at which the shootings take place, and if recorded. The majority of the shooting events happen in dwellings compared to social gathering locations. One hypothesis is that this statistic is skewed because of events that are either related to cases of robbery or homicide. 
+
+```{r}
+df1<-shooting %>%
+  dplyr::group_by(month,year)%>%
+  dplyr::summarise(UNIQUE_COUNT = n_distinct(INCIDENT_KEY))
+
+
+p<-ggplot(data=df1,aes(x = month, y = UNIQUE_COUNT,color=year,group=year))+geom_point()+
+      geom_line()+
+    xlab("Month")+
+    ylab("Number of shootings")+
+    ggtitle("Monthly view of shootings over the years")+
+  theme(plot.title = element_text(hjust=0.5))
+
+ggplotly(p)
+
+#we can see there is a clear trend. Always dropping to minimum in the febraury and increasing until the mid-year and drops towards the end 
+```
+
+We observed that the frequency of shootings is least in February and constantly increases until the middle of the year (July-August) before it starts to fall towards the end. While reading about the trend, we came across a research that also observed a similar trend in all types of crimes which validated our hypothesis.
+
+*Reference research paper: https://www.bjs.gov/content/pub/pdf/ics.pdf
+
+```{r}
+
+#do boxplot for the same data
+
+df1<-shooting %>%
+  dplyr::group_by(weekday,OCCUR_DATE)%>%
+  dplyr::summarise(UNIQUE_COUNT = n_distinct(INCIDENT_KEY))
+
+
+p<-ggplot(data=df1,aes(x = factor(weekday, unique(weekdays(min(df1$OCCUR_DATE) + 1:7))),y=UNIQUE_COUNT )) +
+  geom_boxplot() + 
+  ggtitle("Box Plots of number of shootings as a function of week day ") + 
+  xlab("Weekday") + 
+  ylab("Number of shootings") +
+  theme(plot.title = element_text(face = "bold"))+
+  coord_flip()
+
+p
+
+# Saturday and Sunday are more risky compared to other days.
+
+```
+
+We explored the pattern between the number of shootings and the day of the week, and could clearly see a trend in terms of higher cases of gun violence over the weekends. Monday-Thursday are very much the same, and Friday-Sunday are the same but at a higher level of cases. 
+
+
+```{r}
+
+#faceting by boro
+
+
+year_boro<-shooting %>%
+  dplyr::group_by(year,BORO)%>%
+  dplyr::summarise(UNIQUE_COUNT = n_distinct(INCIDENT_KEY))
+
+
+p<-ggplot(year_boro, aes(x=year, y=UNIQUE_COUNT, group=BORO)) +
+  geom_line(aes(color=BORO))+
+  geom_point(aes(color=BORO)) +
+  xlab("Year") + ylab("Num of shootings") +
+  ggtitle("Time series view of number of shootings across boroughs")+
+  theme(plot.title = element_text(face = "bold"))
+p
+
+
+
+# we can see a sharp decline in n incidents over the years
+
+```
+
+We are of the information that the number of shooting events across the United States are on a rise. We decided to put this information to a test, and we were proven wrong atleast in the case of New York City.
+The number of shooting incidents have definitely been going down over the years from 2006 to 2019 and Staten Island happens to be one of the safest neighbourhoods throughout while Brooklyn happens to be the most violent. 
+
+
+```{r}
+
+#analysis on the shootins as a function of time of the day
+shooting$hour<-format(strptime(shooting$OCCUR_TIME,"%H:%M:%S"),'%H')
+hour_data<-shooting %>%
+  dplyr::group_by(hour)%>%
+  dplyr::summarise(UNIQUE_COUNT = n_distinct(INCIDENT_KEY))
+
+#polar coordinate plot
+p<-ggplot(hour_data, aes(x = hour, y = UNIQUE_COUNT)) +
+  geom_bar(stat = "identity",fill='black') + 
+  coord_polar(theta = "x") +
+  ggtitle("Total shootings on an hourly basis") +
+  labs(x = "Day of the hour in 24", 
+       y = "Number of shootings") +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  theme(plot.subtitle = element_text(hjust = 0.5)) +
+  theme(legend.title = element_text(hjust = 0.5))
+
+p
+```
+
+Since we saw a clear trend in the Month of the year and Day of the week, we were strongly inclined to see if there was a trend in the Hour of the day and the frequency of shootings.
+There is a clear trend where majority of the shootings happen after dusk and before dawn (7PM-4AM).
+
+
+```{r}
+# We can see an increasing partner as the day increases
+
+# let's see the same plot for each month
+
+
+hour_month<-shooting %>%
+  dplyr::group_by(hour,month)%>%
+  dplyr::summarise(UNIQUE_COUNT = n_distinct(INCIDENT_KEY))
+
+
+p<-ggplot(hour_month, aes(x = hour, y = UNIQUE_COUNT)) +
+  geom_bar(stat = "identity",fill='black') + 
+  coord_polar(theta = "x") +
+  ggtitle("Total shootings on an hourly basis for each month") +
+  labs(x = "Day of the hour in 24", 
+       y = "Number of shootings") +
+  facet_wrap(~month, nrow = 4)+
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  theme(plot.subtitle = element_text(hjust = 0.5)) +
+  theme(legend.title = element_text(hjust = 0.5))
+
+p
+
+```
+
+Since we observed that there was such a stark difference between the number of shootings based on the time when there is darkness, we thought that the seasons might also affect and have a correlation with the time of the shootings.
+Except during June-November where the shooting events are highly skewed towards the night-time, all the other months do not really have the same trend and are infact almost evenly spread out through the day.
+
+
+```{r}
+library(tigris)
+library(dplyr)
+library(leaflet)
+library(sp)
+library(ggmap)
+library(maptools)
+library(broom)
+library(httr)
+library(rgdal)
+library(plotly)
+library(RColorBrewer)
+library(ggalluvial)
+library(vcd)
+shooting_precinct <- shooting %>% group_by(PRECINCT) %>% 
+                        summarise(
+                        occurances = n(),
+                        Latitude = sum(Latitude)/n(),
+                        Longitude = sum(Longitude)/n()
+)
+
+
+register_google(key="AIzaSyBVKN9Rb9DtN4TmKA7ch_aX4cDOJa0c2oo")
+
+nyc_map <- get_map(location = c(lon = -73.8518656, lat = 40.7615486), maptype = "terrain", zoom = 11)
+
+p = ggmap(nyc_map) +
+  geom_point(data = shooting_precinct,
+             aes(x = Longitude, y = Latitude, size = occurances*3.5, color = occurances, stroke = 2),
+             alpha = 0.8)+
+  scale_colour_gradient2(low = "#3288bd", mid = "#fee08b", high = "#d53e4f")+
+  guides(size = FALSE)+
+  ggtitle(label = "Geospatial representation of the Shootings in New York",
+          subtitle = "Aggregated at the Precincts and scaled based on the Frequency")+
+  xlab("Longitute")+
+  ylab("Latitude")
+ggplotly(p)
+
+```
+
+We wanted to geospatially map the precinct level incidents to the map of New York and see the regions that are highest in terms of gun violence. We wanted to use this information and correlate it to our existing information about the New York City. 
+We clearly know that the salaries are in the order of:
+Manhattan (~\$94k) > Staten Island (~\$90k) > Queens (~\$75k) > Brooklyn (~\$66k) > Bronx (~\$41k). We can see that the frequency increases as the salary of the neighbourhood decreases.
+
+
+```{r fig.height= 6, fig.width=10, fig.align='center'}
+gender_shootings_by_precinct <- shooting %>%
+  group_by(PRECINCT=shooting$PRECINCT, SEX_VICTIM = shooting$VIC_SEX, BORO = shooting$BORO) %>% 
+  summarise(occurances=n()) %>% 
+  mutate(shootings_perc=occurances*100/nrow(shooting))
+gender_shootings_by_precinct <- gender_shootings_by_precinct[gender_shootings_by_precinct$SEX_VICTIM != "U", ]
+gender_shootings_by_precinct <- gender_shootings_by_precinct[order(gender_shootings_by_precinct$shootings_perc), ]              
+
+#Graph plot
+p2 = ggplot(gender_shootings_by_precinct, aes(x = shootings_perc, y = reorder(PRECINCT, shootings_perc))) +
+  geom_point(aes(color = SEX_VICTIM))+
+  ggtitle("Place of Shooting and % Of Shootings")+
+  xlab('% of Shootings') +
+  ylab ('Location of Shooting') +
+  facet_grid(BORO ~ ., scales = "free_y", space = "free_y")
+
+p2 + theme(strip.text.y = element_text(angle = 10))
+
+```
+
+This graph highlights the male female distribution of the victims. The percentage of females is very less irrespective of the borough considered. It is less that 0.5% in all boroughs except Brooklyn where it just crosses the 0.5% mark. The y axis has the precincts seperated borough wise and ordered in the order of % of male victims.
+
+Brooklyn, followed by Bronx have the highest %of male victims. 
+
+The graph clearly shows that the males are at a very high risk of being shot in all the boroughs.
+
+The gender percentage difference is most prominent in Bronx but many precincts in Manhattan have a comparable gender distribution.
+
+
+
+```{r, fig.height= 6, fig.width=10, fig.align='center'}
+
+#heat map for the race-boro
+mycolors <- c(brewer.pal(4, "Greens")[4:1], 
+              brewer.pal(6, "Reds")[1:6])
+df_heatmap <- shooting %>% group_by(BORO,VIC_RACE) %>% 
+  dplyr::summarize(count = n_distinct(INCIDENT_KEY))
+
+df_heatmap$bins <- cut(df_heatmap$count,breaks=c(0,25,50,75,100,
+                                                 500,1000,1500,2000, 
+                                 2500, 3000, 3500, 4000, 4500,
+                                 5000, 5500, 6000, 6500, 7000, 7500), 
+               labels=c("0-25","25-50","50-75","75-100"
+                        ,"100-500","500-1000","1000-1500",
+                        "1500-2000","2000-2500","2500-3000","3000-3500",
+                        "3500-4000", "4000-4500", "4500-5000","5000-5500",
+                        "5500-6000","6000-6500","6500-7000","7000-7500"))
+ggplot(df_heatmap, aes(x = BORO, y = VIC_RACE)) +
+  geom_tile(aes(fill = bins), color = "white") +
+  scale_fill_manual(values = mycolors, na.value = 'white') +
+  coord_fixed() +
+  labs(title = 'Heat map of Race with Boro over the Frequency of Shootings')
+```
+
+This graph highlights the race borough distribution of number of shootings. It is not a good practice to have varying scales but since the data distribution is not uniform, we have used a different scale for number of shootings below 100 and highligted them in green and the numbers above 100 are shown in red.
+
+Staten Island has the least number of attacks as most of the tiles corresponding to it are in green. Blacks are at the highest risk in all boroughs. American Indian/ Alaskan Native are attacked the least and Brooklyn has the highest number of shootings.
+
+
+```{r}
+#correlation between race and boro
+
+shooting_mosaic = shooting
+shooting_mosaic$BORO[shooting_mosaic$BORO == "STATEN ISLAND"] = "STATEN"
+shooting_mosaic$BORO = factor(shooting_mosaic$BORO, c("STATEN", "BRONX", "MANHATTAN", "BROOKLYN", "QUEENS"))
+mosaic(VIC_RACE ~ BORO, 
+       data = shooting_mosaic[shooting_mosaic$VIC_RACE == c("BLACK", "WHITE HISPANIC", "BLACK HISPANIC"),],
+       direction = c('v','h'),
+       highlighting_fill = brewer.pal(n = 3,
+                                      name = 'PRGn'),
+       labeling_args = list(rot_labels = c(0, 0, 0, 0),
+                            offset_labels = c(0.5, 0, 0, 2.5),
+                            offset_varnames = c(0.9, 0, 0, 3.5)),
+       shade = TRUE,
+       main = "Association between the Race of the Victim and the place of the Shooting")
+```       
+
+Graphs have only been constructed for top 3 races with the highest contribution in the victim population as these races are in the red zone in the above graph. It can be clearly observed that the Blacks are at the highest risk in all boroughs.
+
+But the proportion of attacks in Brooklyn is the highest and it is the the lowest in Bronx and it is completely opposite for White Hispanic as the attacked proportion is the least for them in Brooklyn and the most in Bronx.
+
+Queens has the highest proportion difference between black hispanic and white hispanic.
+
+
+```{r}
+
+#alluvial plot
+df_alluvial_age <- shooting %>% group_by(PERP_AGE_GROUP,VIC_AGE_GROUP) %>% 
+  dplyr::summarize(count = n_distinct(INCIDENT_KEY))
+df_alluvial_age <- df_alluvial_age %>% filter((PERP_AGE_GROUP %in% c("<18","18-24","25-44",
+                                                             "45-64"))&
+                                        (VIC_AGE_GROUP %in% c("<18","18-24","25-44",
+                                                              "45-64")) )
+
+#df_alluvial_age %>% group_by(PERP_AGE_GROUP) %>% summarize(count=n())
+
+ggplot(df_alluvial_age,aes(axis1 = PERP_AGE_GROUP, axis2 = VIC_AGE_GROUP, y = count)) + 
+  geom_alluvium(color = 'blue', aes(fill = PERP_AGE_GROUP)) + 
+  geom_stratum() + 
+  geom_text(stat = 'stratum',aes(label= after_stat(stratum)))+
+  scale_x_discrete(limits = c('PERP_AGE_GROUP','VIC_AGE_GROUP'),expand = c(0.1,0.1)) +
+  labs(title = 'Age analysis of Shooters and victims')
+```
+
+From the Alluvial graph, it can be seen that the proportion of people below 18 years of age is the same in perpetrators as well as the victims.
+
+People between 18-44 years of age are the most active in both groups. The proportion of people in 45-64 is less in perpetrators when compared to victims.
+
+Perpetrators tend to attack more in their similar age groups. In general, the attacks from a particular age group drops as the victim age group moves away from the attackers age group.
+
+
+
