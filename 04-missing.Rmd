@@ -1,1 +1,55 @@
 # Missing values
+
+
+```{r}
+library(naniar)
+library(dplyr)
+library(ggplot2)
+library(plotly)
+library(tidyr)
+
+```
+
+
+```{r}
+
+#handling missing/incorrect value
+shooting<-shooting[!grepl("1020", shooting$PERP_AGE_GROUP),]
+shooting<-shooting[!grepl("224", shooting$PERP_AGE_GROUP),]
+shooting<-shooting[!grepl("940", shooting$PERP_AGE_GROUP),]
+```
+
+```{r}
+#plots for missing values distribution
+
+
+vis_miss(shooting)
+gg_miss_upset(shooting)
+
+```
+
+```{r}
+# Lot of missing values in LOCATION_DESC, perpretrator age group, sex, race. This makes sense because not all perpretrators will be caught to capture this informartion.
+#we see the missing proportion of perpetrator data kept increasing. We confirm that by the following analysis
+
+missing_data<-shooting %>%
+  dplyr::group_by(year)%>%
+  dplyr::summarise(total = n())
+
+missing_data$missing<-aggregate(PERP_AGE_GROUP ~ year, data=shooting, function(x) {sum(is.na(x))}, na.action = NULL)$PERP_AGE_GROUP
+missing_data$not_missing <- missing_data$total - missing_data$missing
+missing_data <- missing_data[,c("year", "missing", "not_missing")]
+missing_data <- missing_data %>% pivot_longer(!year, names_to = "availability", values_to = "value")
+
+ggplot(missing_data, aes(fill=availability, x=year, y=value))+
+  geom_bar(position = "fill", stat = "identity")+
+ ggtitle('Distribution  of missing and non-missing data for perpetrators over years')+
+  xlab('year') +
+  ylab('percentage')+
+  theme(plot.title = element_text(hjust=0.5))
+  
+
+```
+
+
+
