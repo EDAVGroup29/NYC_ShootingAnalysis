@@ -24,9 +24,12 @@ shooting<-shooting[!grepl("940", shooting$PERP_AGE_GROUP),]
 #plots for missing values distribution
 
 
-#vis_miss(shooting)
-#gg_miss_upset(shooting)
+vis_miss(shooting)
 
+
+```
+```{r}
+gg_miss_upset(shooting)
 ```
 
 ```{r}
