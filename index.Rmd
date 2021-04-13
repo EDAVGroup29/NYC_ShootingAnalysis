@@ -1,5 +1,5 @@
 --- 
-title: "New York City Gun Violence Pattern Exploration"
+title: "New York City Gun Violence Patterns Exploration"
 author: "Sai Thrinath Gunda, Tarun Devireddy, Mitali Bante"
 date: "`r Sys.Date()`"
 site: bookdown::bookdown_site
