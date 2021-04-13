@@ -1,5 +1,8 @@
 # Interactive component
 
+For the interactive plot below, we can see and compare the shooting frequency each month at a Borough level by selecting the years and the borough you want to compare.
+The chart lets you choose one borough and multiple years.
+
 
 <iframe src="interactive_chart.html" width="800" height="800"></iframe>
 

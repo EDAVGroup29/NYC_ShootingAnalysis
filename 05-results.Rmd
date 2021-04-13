@@ -1,44 +1,6 @@
 # Results
 
-```{r}
 
-#Analysis for number of attackers and victims at incident.
-
-
-attackers_victims<-shooting %>%
-  dplyr::group_by(INCIDENT_KEY)%>%
-  dplyr::summarise(n_attackers = n_distinct(PERP_AGE_GROUP),n_victims=n_distinct(VIC_AGE_GROUP))
-
-df_attackers <- attackers_victims %>%
-  dplyr::group_by(n_attackers)%>%
-  dplyr::summarise(count = n_distinct(INCIDENT_KEY))
-
-df_victims <- attackers_victims %>%
-  dplyr::group_by(n_victims)%>%
-  dplyr::summarise(count = n_distinct(INCIDENT_KEY))
-
-
-p<-
-  ggplot(data=df_victims)+
-  geom_bar(aes(x=n_victims, y=count),stat='identity')+
-  ggtitle('Distribution  of number of victims ')+
-  xlab('num victims at a incident') +
-  ylab('count of incidents')+
-  theme(plot.title = element_text(hjust=0.5))
-  
-p
-
-
-p<-
-  ggplot(data=df_attackers)+
-  geom_bar(aes(x=n_attackers, y=count),stat='identity')+
-  ggtitle('Number of shootings distribution ')+
-  xlab('num attackers at a incident') +
-  ylab('count of incidents')+
-  theme(plot.title = element_text(hjust=0.5))
-p
-
-```
 
 
 ```{r}
@@ -314,11 +276,11 @@ mosaic(VIC_RACE ~ BORO,
        direction = c('v','h'),
        highlighting_fill = brewer.pal(n = 3,
                                       name = 'PRGn'),
-       labeling_args = list(rot_labels = c(0, 0, 0, 0),
+       labeling_args = list(rot_labels = c(45, 0, 0, 45),
                             offset_labels = c(0.5, 0, 0, 2.5),
                             offset_varnames = c(0.9, 0, 0, 3.5)),
        shade = TRUE,
-       main = "Association between the Race of the Victim and the place of the Shooting")
+       main = "Correlation of Victim Race and Borough")
 ```       
 
 Graphs have only been constructed for top 3 races with the highest contribution in the victim population as these races are in the red zone in the above graph. It can be clearly observed that the Blacks are at the highest risk in all boroughs.
