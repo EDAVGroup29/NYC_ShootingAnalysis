@@ -6,5 +6,4 @@ data-transformation
 missing-values
 results
 interactive-component
-references
 conclusion
