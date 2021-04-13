@@ -2,3 +2,18 @@
 
 
 <iframe src="interactive_chart.html" width="800" height="800"></iframe>
+
+
+
+
+
+
+### References:
+Understanding Multiple Line Charts
+  1. https://www.d3-graph-gallery.com/graph/line_several_group.html
+
+Understanding Multiple checkboxes
+  1. https://bl.ocks.org/johnnygizmo/531991a77047112b7ca89f78b840fba5
+
+Understanding Filters
+  1. https://www.d3-graph-gallery.com/graph/barplot_button_data_simple.html
