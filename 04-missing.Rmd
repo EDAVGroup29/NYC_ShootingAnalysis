@@ -13,6 +13,7 @@ library(tidyr)
 
 ```{r}
 
+
 #handling missing/incorrect value
 shooting<-shooting[!grepl("1020", shooting$PERP_AGE_GROUP),]
 shooting<-shooting[!grepl("224", shooting$PERP_AGE_GROUP),]
@@ -23,8 +24,8 @@ shooting<-shooting[!grepl("940", shooting$PERP_AGE_GROUP),]
 #plots for missing values distribution
 
 
-vis_miss(shooting)
-gg_miss_upset(shooting)
+#vis_miss(shooting)
+#gg_miss_upset(shooting)
 
 ```
 

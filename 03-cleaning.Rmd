@@ -6,3 +6,221 @@ The data we used had some missing values but they were read as empty strings. Do
 The data had some misprints in the age for perpetrators. Ages such as 1020, 940, 224 which cannot be possible in reality were present. Such values were removed from the dataset.
 We also created some additional columns of day of week, year, month, day so as to directly use these columns in data exploration.
 The interactive graph generated required data to be in a different form and also multiple files were generated for it which can be seen in the data folder
+
+```{r}
+urlfile<-'https://raw.githubusercontent.com/EDAVGroup29/NYC_ShootingAnalysis/main/data/NYPD_Shooting_Incident_Data_Historic.csv'
+shooting<-read.csv(urlfile)
+```
+
+```{r}
+library(naniar)
+library(dplyr)
+library(ggplot2)
+library(plotly)
+library(tidyr)
+```
+
+
+```{r}
+shooting[shooting==""]<-NA
+shooting$OCCUR_DATE <- as.POSIXct(shooting$OCCUR_DATE, format = "%m/%d/%Y")
+shooting$year <- format(as.Date(shooting$OCCUR_DATE), "%Y")
+shooting$month <- format(as.Date(shooting$OCCUR_DATE), "%m")
+shooting$day <- format(as.Date(shooting$OCCUR_DATE), "%d")
+shooting$weekday <- weekdays(as.Date(shooting$OCCUR_DATE))
+shooting = shooting[order(shooting$OCCUR_DATE),]
+
+```
+
+
+```{r eval = FALSE}
+#Transforming data for interactive chart
+month_boro<-shooting %>%
+  dplyr::group_by(month,BORO,year)%>%
+  dplyr::summarise(num_shootings = n_distinct(INCIDENT_KEY))
+
+month_boro <- month_boro %>% spread(year, num_shootings)
+intereactive_data = month_boro[month_boro$BORO == "BRONX",]
+write.csv(intereactive_data, "Bronx_data.csv")
+intereactive_data = month_boro[month_boro$BORO == "BROOKLYN",]
+write.csv(intereactive_data, "Brooklyn_data.csv")
+intereactive_data = month_boro[month_boro$BORO == "MANHATTAN",]
+write.csv(intereactive_data, "Manhattan_data.csv")
+intereactive_data = month_boro[month_boro$BORO == "QUEENS",]
+write.csv(intereactive_data, "Queens_data.csv")
+intereactive_data = month_boro[month_boro$BORO == "STATEN ISLAND",]
+write.csv(intereactive_data, "Staten_data.csv")
+
+```
+
+
+```{r}
+#Analysis for number of attackers and victims at incident.
+
+
+attackers_victims<-shooting %>%
+  dplyr::group_by(INCIDENT_KEY)%>%
+  dplyr::summarise(n_attackers = n_distinct(PERP_AGE_GROUP),n_victims=n_distinct(VIC_AGE_GROUP))
+
+df_attackers <- attackers_victims %>%
+  dplyr::group_by(n_attackers)%>%
+  dplyr::summarise(count = n_distinct(INCIDENT_KEY))
+
+df_victims <- attackers_victims %>%
+  dplyr::group_by(n_victims)%>%
+  dplyr::summarise(count = n_distinct(INCIDENT_KEY))
+
+
+p<-
+  ggplot(data=df_victims)+
+  geom_bar(aes(x=n_victims, y=count),stat='identity')+
+  ggtitle('Distribution  of number of victims ')+
+  xlab('num victims at a incident') +
+  ylab('count of incidents')+
+  theme(plot.title = element_text(hjust=0.5))
+  
+p
+
+
+p<-
+  ggplot(data=df_attackers)+
+  geom_bar(aes(x=n_attackers, y=count),stat='identity')+
+  ggtitle('Number of attackers distribution ')+
+  xlab('num attackers at a incident') +
+  ylab('count of incidents')+
+  theme(plot.title = element_text(hjust=0.5))
+p
+```
+
+```{r}
+location_stats<-shooting %>%
+   filter(shooting$LOCATION_DESC!="")%>%
+  dplyr::group_by(LOCATION_DESC)%>%
+  dplyr::summarise(n_attacks = n_distinct(INCIDENT_KEY))
+
+location_stats <- location_stats%>%
+   filter(location_stats$n_attacks>50)
+p<-
+  ggplot(data=location_stats)+
+  geom_bar(aes(x=reorder(LOCATION_DESC,n_attacks), y=n_attacks),stat='identity')+
+  coord_flip()+
+  ggtitle('Major Locations for Shooting Incidents')+
+  xlab('Location') +
+  ylab('Number of Shootings')+
+  theme(plot.title = element_text(hjust=0.5))
+p
+```
+
+
+```{r}
+df1<-shooting %>%
+  dplyr::group_by(month,year)%>%
+  dplyr::summarise(UNIQUE_COUNT = n_distinct(INCIDENT_KEY))
+
+
+p<-ggplot(data=df1,aes(x = month, y = UNIQUE_COUNT,color=year,group=year))+geom_point()+
+      geom_line()+
+    xlab("Month")+
+    ylab("Number of shootings")+
+    ggtitle("Monthly view of shootings over the years")+
+  theme(plot.title = element_text(hjust=0.5))
+
+ggplotly(p)
+```
+
+We can see there is a clear trend. Always dropping to minimum in the febraury and increasing until the mid-year and drops towards the end 
+
+
+
+```{r}
+
+
+df1<-shooting %>%
+  dplyr::group_by(weekday,OCCUR_DATE)%>%
+  dplyr::summarise(UNIQUE_COUNT = n_distinct(INCIDENT_KEY))
+
+df1$weekday<- factor(df1$weekday, levels=c("Monday","Tuesday", "Wednesday", "Thursday", "Friday", "Saturday","Sunday"))
+
+ggplot(data=df1,aes(x = weekday,y=UNIQUE_COUNT )) +
+  geom_boxplot() + 
+  ggtitle("Box Plots of number of shootings as a function of week day ") + 
+  xlab("Weekday") + 
+  ylab("Number of shootings") +
+  theme(plot.title = element_text(face = "bold"))+
+  coord_flip()
+
+
+```
+
+Saturday and Sunday are more risky compared to other days.
+
+
+```{r}
+
+#faceting by boro
+year_boro<-shooting %>%
+  dplyr::group_by(year,BORO)%>%
+  dplyr::summarise(UNIQUE_COUNT = n_distinct(INCIDENT_KEY))
+
+
+p<-ggplot(year_boro, aes(x=year, y=UNIQUE_COUNT, group=BORO)) +
+  geom_line(aes(color=BORO))+
+  geom_point(aes(color=BORO)) +
+  xlab("Year") + ylab("Num of shootings") +
+  ggtitle("Time series view of number of shootings across boroughs")+
+  theme(plot.title = element_text(face = "bold"))
+p
+```
+
+We can see a sharp decline in n incidents over the years
+
+
+
+```{r}
+#analysis on the shootins as a function of time of the day
+shooting$hour<-format(strptime(shooting$OCCUR_TIME,"%H:%M:%S"),'%H')
+
+hour_data<-shooting %>%
+  dplyr::group_by(hour)%>%
+  dplyr::summarise(UNIQUE_COUNT = n_distinct(INCIDENT_KEY))
+
+#polar coordinate plot
+p<-ggplot(hour_data, aes(x = hour, y = UNIQUE_COUNT)) +
+  geom_bar(stat = "identity",fill='black') + 
+  coord_polar(theta = "x") +
+  ggtitle("Total shootings on an hourly basis") +
+  labs(x = "Day of the hour in 24", 
+       y = "Number of shootings") +
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  theme(plot.subtitle = element_text(hjust = 0.5)) +
+  theme(legend.title = element_text(hjust = 0.5))
+
+p
+
+```
+
+We can see an increasing partner as the day increases
+Let's see the same plot for each month
+
+
+```{r eval=FALSE}
+hour_month<-shooting %>%
+  dplyr::group_by(hour,month)%>%
+  dplyr::summarise(UNIQUE_COUNT = n_distinct(INCIDENT_KEY))
+
+p<-ggplot(hour_month, aes(x = hour, y = UNIQUE_COUNT)) +
+  geom_bar(stat = "identity",fill='black') + 
+  coord_polar(theta = "x") +
+  ggtitle("Total shootings on an hourly basis for each month") +
+  labs(x = "Day of the hour in 24", 
+       y = "Number of shootings") +
+  facet_wrap(~month, nrow = 4)+
+  theme_bw() +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  theme(plot.subtitle = element_text(hjust = 0.5)) +
+  theme(legend.title = element_text(hjust = 0.5))
+
+p
+
+```
